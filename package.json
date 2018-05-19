@@ -1,0 +1,12 @@
+{
+  "name": "{{projectName}}",
+  "version": "{{projectVersion}}",
+  "description": "{{projectDescription}}",
+  "main": "index.js",
+  "repository": "git@github.com:liurongqing/phaser-template.git",
+  "author": "liurongqing <phpgege@163.com>",
+  "license": "MIT",
+  "dependencies": {
+    "macaw-ui": "{{supportUiVersion}}"
+  }
+}
