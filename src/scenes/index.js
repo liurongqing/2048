@@ -1,5 +1,1 @@
-import MainScene from './MainScene'
-
-export default {
-  MainScene
-}
+export { default as MainScene } from './MainScene'
