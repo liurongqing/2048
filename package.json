@@ -11,11 +11,9 @@
     "prod": "webpack --config ./config//webpack.prod.js"
   },
   "devDependencies": {
-    "closure-webpack-plugin": "^0.0.24",
     "html-webpack-plugin": "^3.2.0",
     "webpack": "^4.12.0",
     "webpack-cli": "^3.0.3",
-    "webpack-closure-compiler": "^2.1.6",
     "webpack-dev-server": "^3.1.4",
     "webpack-merge": "^4.1.2"
   },
