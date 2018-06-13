@@ -1,4 +1,4 @@
-# phaser-template 模版
+# phaser-template 模版 :smile:
 基于 node 10.4 开发
 
 ## 使用
