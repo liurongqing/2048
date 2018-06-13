@@ -2,7 +2,8 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    entry: './src/index.js',
+    context: path.resolve('./src'),
+    entry: './index.js',
     output: {
         path: path.resolve(__dirname, '../dist'),
         filename: '[name]_[hash:8].js',
@@ -12,7 +13,7 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             filename: 'index.html',
-            template: 'src/index.html',
+            template: 'index.html',
             title: 'phaser-template'
         })
     ],
