@@ -1,6 +1,6 @@
 # Phaser3 开发 2048 游戏
 运行环境 
-- node 10.4
+- node 10.4（可用 nvm 切换 node 版本）
 - webpack 4.12
 - phaser 3.10.1
 
