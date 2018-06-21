@@ -9,7 +9,21 @@ module.exports = {
         filename: '[name]_[hash:8].js',
         chunkFilename: '[name]_[hash:8].js'
     },
-    module: {},
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                include: path.resolve(__dirname, '../src/'),
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['env'],
+                        plugins: ["transform-class-properties"]
+                    }
+                }
+            }
+        ]
+    },
     plugins: [
         new HtmlWebpackPlugin({
             filename: 'index.html',
