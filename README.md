@@ -6,6 +6,10 @@
 
 开发中...
 
+## 功能
+- 支持 WSAD 及方向键操作
+- 支持 移动端滑动操作
+
 ## 项目在线演示
 https://liurongqing.github.io/2048
 
@@ -21,9 +25,9 @@ git clone https://github.com/liurongqing/2048.git
 npm install # or yarn 
 
 # 运行项目
-npm start
+npm start # or yarn start
 
 # 打包生产
-npm run prod
+npm run prod # or yarn run prod
 ```
 
