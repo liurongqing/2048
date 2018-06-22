@@ -8,9 +8,6 @@ class MainScene extends Phaser.Scene {
         super({
             key: 'MainScene'
         });
-
-
-
     }
 
     preload() {
@@ -27,6 +24,122 @@ class MainScene extends Phaser.Scene {
 
     create() {
         this.layout();
+
+        // 随机生成 2 个数字方块
+        this.addTile();
+        this.addTile();
+
+        this.addEvent();
+
+    }
+
+    addEvent() {
+        // 移动端操作
+        this.input.on("pointerup", this.handleTouch);
+
+        // 键盘操作
+        this.input.keyboard.on("keydown", this.handleKey);
+    }
+
+    handleTouch = (e) => {
+
+        // 计算按住时间
+        let swipeTime = e.upTime - e.downTime;
+
+        // 生成 {x: v1, y: v2} 格式
+        let swipe = new Phaser.Geom.Point(e.upX - e.downX, e.upY - e.downY);
+
+        // 获取对角线长度
+        let swipeMagnitude = Phaser.Geom.Point.GetMagnitude(swipe);
+
+        // 偏向方向比例 1 为直着朝一个方向
+        let swipeNormal = new Phaser.Geom.Point(swipe.x / swipeMagnitude, swipe.y / swipeMagnitude);
+
+        /**
+         * 滑动的对角线长度大于 20
+         * 滑动的时间小于 1000 毫秒
+         * 滑动的角度尽量偏一个方向
+         */
+        if (swipeMagnitude > 20 && swipeTime < 1000 && (Math.abs(swipeNormal.y) > .8 || Math.abs(swipeNormal.x) > .8)) {
+            let children = this.tileGroup.getChildren();
+            if (swipeNormal.x > .8) {
+                for (var i = 0; i < children.length; i++) {
+
+                    // 设置层级，越左侧层级越高
+                    children[i].depth = game.config.width - children[i].x;
+                }
+                console.log('向右')
+            }
+
+            if (swipeNormal.x < -.8) {
+                for (var i = 0; i < children.length; i++) {
+
+                    // 越向右层级越高
+                    children[i].depth = children[i].x;
+                }
+                console.log('向左')
+            }
+
+            if (swipeNormal.y > .8) {
+                for (var i = 0; i < children.length; i++) {
+
+                    // 越上面层级越高
+                    children[i].depth = game.config.height - children[i].y;
+                }
+                console.log('向下')
+            }
+
+            if (swipeNormal.y < -.8) {
+                for (var i = 0; i < children.length; i++) {
+
+                    // 越下面层级越高
+                    children[i].depth = children[i].y;
+                }
+                console.log('向上')
+            }
+        }
+    }
+
+    handleKey = (e) => {
+        let children = this.tileGroup.getChildren();
+        switch (e.code) {
+            case "KeyA":
+            case "ArrowLeft":
+                for (var i = 0; i < children.length; i++) {
+
+                    // 越向右层级越高
+                    children[i].depth = children[i].x;
+                }
+                console.log('向左')
+                break;
+            case "KeyD":
+            case "ArrowRight":
+                for (var i = 0; i < children.length; i++) {
+
+                    // 设置层级，越左侧层级越高
+                    children[i].depth = game.config.width - children[i].x;
+                }
+                console.log('向右')
+                break;
+            case "KeyW":
+            case "ArrowUp":
+                for (var i = 0; i < children.length; i++) {
+
+                    // 越下面层级越高
+                    children[i].depth = children[i].y;
+                }
+                console.log('向上')
+                break;
+            case "KeyS":
+            case "ArrowDown":
+                for (var i = 0; i < children.length; i++) {
+
+                    // 越上面层级越高
+                    children[i].depth = game.config.height - children[i].y;
+                }
+                console.log('向下')
+                break;
+        }
     }
 
     // 布局
@@ -105,11 +218,38 @@ class MainScene extends Phaser.Scene {
         }
     }
 
-
-
     setPosition(pos, direction) {
         let top = direction === ROW ? 100 : 0;
         return pos * (TILE_SIZE + TILE_SPACING) + TILE_SIZE * .5 + TILE_SPACING + top;
+    }
+
+    addTile() {
+        let emptyTiles = [];
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+                if (this.tileArray[i][j].tileValue === 0) {
+                    emptyTiles.push({
+                        row: i,
+                        col: j
+                    })
+                }
+            }
+        }
+
+        if (emptyTiles.length > 0) {
+            let chosenTile = Phaser.Utils.Array.GetRandom(emptyTiles);
+            this.tileArray[chosenTile.row][chosenTile.col].tileValue = 1;
+            this.tileArray[chosenTile.row][chosenTile.col].tileSprite.visible = true;
+            this.tileArray[chosenTile.row][chosenTile.col].tileSprite.setFrame(0);
+
+            this.tweens.add({
+                targets: [this.tileArray[chosenTile.row][chosenTile.col].tileSprite],
+                alpha: 1,
+                duration: TWEEN_DURATION,
+                onCompolete: () => {
+                }
+            });
+        }
     }
 
 
