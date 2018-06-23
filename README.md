@@ -10,10 +10,10 @@
 - 支持 WSAD 及方向键操作
 - 支持 移动端滑动操作
 
-## 项目在线演示【暂无】
+## 项目在线演示
 https://liurongqing.github.io/2048
 
-## 开发教程【持续更新中】
+## 开发教程
 https://www.liurongqing.com/tag/phaser
 
 ## 运行本项目

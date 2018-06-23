@@ -1,10 +1,11 @@
 import { COL, ROW, TILE_SIZE, TILE_SPACING, TWEEN_DURATION, LOCAL_STORAGE_NAME } from '../constant'
-import { runInNewContext } from 'vm';
 
 class MainScene extends Phaser.Scene {
 
     tileArray = [];
     canMove = false;
+    score = 0; // 分数
+    bestScore = localStorage.getItem(LOCAL_STORAGE_NAME) == null ? 0 : localStorage.getItem(LOCAL_STORAGE_NAME); // 最高分数
 
     constructor() {
         super({
@@ -21,7 +22,10 @@ class MainScene extends Phaser.Scene {
         this.load.spritesheet('tiles', 'assets/sprites/tiles.png', {
             frameWidth: TILE_SIZE,
             frameHeight: TILE_SIZE
-        })
+        });
+
+        this.load.audio("move", ["assets/sounds/move.ogg", "assets/sounds/move.mp3"]);
+        this.load.audio("grow", ["assets/sounds/grow.ogg", "assets/sounds/grow.mp3"]);
     }
 
     create() {
@@ -33,6 +37,13 @@ class MainScene extends Phaser.Scene {
 
         this.addEvent();
 
+        this.addSound();
+
+    }
+
+    addSound() {
+        this.moveSound = this.sound.add("move");
+        this.growSound = this.sound.add("grow");
     }
 
     addEvent() {
@@ -71,6 +82,7 @@ class MainScene extends Phaser.Scene {
                     children[i].depth = game.config.width - children[i].x;
                 }
                 console.log('向右')
+                this.move(0, 1);
             }
 
             if (swipeNormal.x < -.8) {
@@ -80,6 +92,7 @@ class MainScene extends Phaser.Scene {
                     children[i].depth = children[i].x;
                 }
                 console.log('向左')
+                this.move(0, -1);
             }
 
             if (swipeNormal.y > .8) {
@@ -89,6 +102,8 @@ class MainScene extends Phaser.Scene {
                     children[i].depth = game.config.height - children[i].y;
                 }
                 console.log('向下')
+                this.move(1, 0);
+
             }
 
             if (swipeNormal.y < -.8) {
@@ -98,11 +113,16 @@ class MainScene extends Phaser.Scene {
                     children[i].depth = children[i].y;
                 }
                 console.log('向上')
+                this.move(-1, 0);
             }
         }
     }
 
+
     handleKey = (e) => {
+
+        console.log(this.canMove)
+
         if (this.canMove) {
             let children = this.tileGroup.getChildren();
             switch (e.code) {
@@ -167,6 +187,8 @@ class MainScene extends Phaser.Scene {
     move(rowStep, colStep) {
         this.canMove = false;
         this.movingTiles = 0;
+        let somethingMoved = false;
+        let moveScore = 0;
 
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
@@ -212,6 +234,9 @@ class MainScene extends Phaser.Scene {
                         // 目标方块 tileValue + 1， 本来是 Math.pow(2,1) 变成了 Math.pow(2,2)，也就是方块 2 变成 4
                         this.tileArray[row + rowSteps][col + colSteps].tileValue++;
 
+                        // 移动分数
+                        moveScore += Math.pow(2, this.tileArray[row + rowSteps][col + colSteps].tileValue);
+
                         // 目标块只能被覆盖一次
                         this.tileArray[row + rowSteps][col + colSteps].canUpgrade = false;
 
@@ -225,6 +250,7 @@ class MainScene extends Phaser.Scene {
                         // 参数四：移动单位距离
                         // 参数五： bool
                         this.moveTile(this.tileArray[row][col], row + rowSteps, col + colSteps, Math.abs(rowSteps + colSteps), true);
+                        somethingMoved = true;
                     } else {
 
                         // while 时最后一次条件不成立，但 colSteps 与 rowSteps 已经加了col与row，所以这里减回去。
@@ -247,9 +273,21 @@ class MainScene extends Phaser.Scene {
                             // 参数四：移动单位距离
                             // 参数五： bool
                             this.moveTile(this.tileArray[row][col], row + rowSteps, col + colSteps, Math.abs(rowSteps + colSteps), false);
+                            somethingMoved = true;
                         }
                     }
                 }
+            }
+        }
+
+        if (!somethingMoved) {
+            this.canMove = true;
+        } else {
+            this.moveSound.play();
+            this.score += moveScore;
+            if (this.score > this.bestScore) {
+                this.bestScore = this.score;
+                localStorage.setItem(LOCAL_STORAGE_NAME, this.bestScore);
             }
         }
     }
@@ -270,39 +308,24 @@ class MainScene extends Phaser.Scene {
             x: this.setPosition(col, COL),
             y: this.setPosition(row, ROW),
             duration: TWEEN_DURATION * distance,
-            onCompolete: () => {
+            onComplete: () => {
                 this.movingTiles--;
-
                 if (changeNumber) {
                     this.transformTile(tile, row, col);
                 }
                 if (this.movingTiles === 0) {
-                    console.log('reset...')
+                    this.scoreText.setText(this.score);
+                    this.bestScoreText.setText(this.bestScore);
                     this.resetTiles();
                     this.addTile();
                 }
 
             }
-            // onComplete: function (tween) {
-            //     tween.parent.scene.movingTiles--;
-
-            //     // 数字有变化，则更新加动画
-            //     if (changeNumber) {
-            //         tween.parent.scene.transformTile(tile, row, col);
-            //     }
-
-            //     // 全部移动完以后
-            //     if (tween.parent.scene.movingTiles == 0) {
-            //         tween.parent.scene.scoreText.text = tween.parent.scene.score.toString();
-            //         tween.parent.scene.bestScoreText.text = tween.parent.scene.bestScore.toString();
-            //         tween.parent.scene.resetTiles();
-            //         tween.parent.scene.addTile();
-            //     }
-            // }
         })
     }
 
     transformTile(tile, row, col) {
+        this.growSound.play();
         this.movingTiles++;
         tile.tileSprite.setFrame(this.tileArray[row][col].tileValue - 1);
         this.tweens.add({
@@ -312,14 +335,14 @@ class MainScene extends Phaser.Scene {
             duration: TWEEN_DURATION,
             yoyo: true,
             repeat: 1,
-            onComplete: function () {
+            onComplete: () => {
                 this.movingTiles--;
                 if (this.movingTiles === 0) {
-                    console.log('reset...')
+                    this.scoreText.setText(this.score);
+                    this.bestScoreText.setText(this.bestScore);
                     this.resetTiles();
                     this.addTile();
                 }
-                console.log('transform')
             }
         })
     }
@@ -358,6 +381,7 @@ class MainScene extends Phaser.Scene {
     }
 
     layout_header() {
+
         // 添加分数背景
         this.add.sprite(this.setPosition(0, COL) + 30, this.setPosition(0, ROW) - 100, 'score');
 
@@ -365,31 +389,17 @@ class MainScene extends Phaser.Scene {
         this.add.sprite(this.setPosition(1, COL) + 40, this.setPosition(0, ROW) - 100, 'score_best');
 
         // 重新开始游戏
-        this.add.sprite(this.setPosition(3, COL) - 10, this.setPosition(0, ROW) - 87, "restart");
+        let restartButton = this.add.sprite(this.setPosition(3, COL) - 10, this.setPosition(0, ROW) - 87, "restart");
+        restartButton.setInteractive();
+        restartButton.on("pointerdown", () => {
+            this.scene.start("MainScene");
+        })
 
         // 分数 
-        this.make.text({
-            x: this.setPosition(0, COL) + 30,
-            y: this.setPosition(0, ROW) - 90,
-            text: '4',
-            origin: { x: 0.5, y: 0.5 },
-            style: {
-                font: 'bold 22px Arial',
-                fill: '#ffffff'
-            }
-        });
+        this.scoreText = this.add.text(this.setPosition(0, COL) + 30, this.setPosition(0, ROW) - 90, '0', { fontFamily: 'Arial', fontSize: 22, fill: '#ffffff' }).setOrigin(.5);
 
-        // 最高分数 
-        this.make.text({
-            x: this.setPosition(1, COL) + 40,
-            y: this.setPosition(0, ROW) - 90,
-            text: '10',
-            origin: { x: 0.5, y: 0.5 },
-            style: {
-                font: 'bold 22px Arial',
-                fill: '#ffffff'
-            }
-        });
+        // 最高分数
+        this.bestScoreText = this.add.text(this.setPosition(1, COL) + 40, this.setPosition(0, ROW) - 90, this.bestScore, { fontFamily: 'Arial', fontSize: 22, fill: '#ffffff' }).setOrigin(.5);
     }
 
     layout_body() {
