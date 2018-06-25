@@ -56,72 +56,73 @@ class MainScene extends Phaser.Scene {
 
     handleTouch = (e) => {
 
-        // 计算按住时间
-        let swipeTime = e.upTime - e.downTime;
+        if (this.canMove) {
 
-        // 生成 {x: v1, y: v2} 格式
-        let swipe = new Phaser.Geom.Point(e.upX - e.downX, e.upY - e.downY);
+            // 计算按住时间
+            let swipeTime = e.upTime - e.downTime;
 
-        // 获取对角线长度
-        let swipeMagnitude = Phaser.Geom.Point.GetMagnitude(swipe);
+            // 生成 {x: v1, y: v2} 格式
+            let swipe = new Phaser.Geom.Point(e.upX - e.downX, e.upY - e.downY);
 
-        // 偏向方向比例 1 为直着朝一个方向
-        let swipeNormal = new Phaser.Geom.Point(swipe.x / swipeMagnitude, swipe.y / swipeMagnitude);
+            // 获取对角线长度
+            let swipeMagnitude = Phaser.Geom.Point.GetMagnitude(swipe);
 
-        /**
-         * 滑动的对角线长度大于 20
-         * 滑动的时间小于 1000 毫秒
-         * 滑动的角度尽量偏一个方向
-         */
-        if (swipeMagnitude > 20 && swipeTime < 1000 && (Math.abs(swipeNormal.y) > .8 || Math.abs(swipeNormal.x) > .8)) {
-            let children = this.tileGroup.getChildren();
-            if (swipeNormal.x > .8) {
-                for (var i = 0; i < children.length; i++) {
+            // 偏向方向比例 1 为直着朝一个方向
+            let swipeNormal = new Phaser.Geom.Point(swipe.x / swipeMagnitude, swipe.y / swipeMagnitude);
 
-                    // 设置层级，越左侧层级越高
-                    children[i].depth = game.config.width - children[i].x;
+            /**
+             * 滑动的对角线长度大于 20
+             * 滑动的时间小于 1000 毫秒
+             * 滑动的角度尽量偏一个方向
+             */
+            if (swipeMagnitude > 20 && swipeTime < 1000 && (Math.abs(swipeNormal.y) > .8 || Math.abs(swipeNormal.x) > .8)) {
+                let children = this.tileGroup.getChildren();
+                if (swipeNormal.x > .8) {
+                    for (var i = 0; i < children.length; i++) {
+
+                        // 设置层级，越左侧层级越高
+                        children[i].depth = game.config.width - children[i].x;
+                    }
+                    console.log('向右')
+                    this.move(0, 1);
                 }
-                console.log('向右')
-                this.move(0, 1);
-            }
 
-            if (swipeNormal.x < -.8) {
-                for (var i = 0; i < children.length; i++) {
+                if (swipeNormal.x < -.8) {
+                    for (var i = 0; i < children.length; i++) {
 
-                    // 越向右层级越高
-                    children[i].depth = children[i].x;
+                        // 越向右层级越高
+                        children[i].depth = children[i].x;
+                    }
+                    console.log('向左')
+                    this.move(0, -1);
                 }
-                console.log('向左')
-                this.move(0, -1);
-            }
 
-            if (swipeNormal.y > .8) {
-                for (var i = 0; i < children.length; i++) {
+                if (swipeNormal.y > .8) {
+                    for (var i = 0; i < children.length; i++) {
 
-                    // 越上面层级越高
-                    children[i].depth = game.config.height - children[i].y;
+                        // 越上面层级越高
+                        children[i].depth = game.config.height - children[i].y;
+                    }
+                    console.log('向下')
+                    this.move(1, 0);
+
                 }
-                console.log('向下')
-                this.move(1, 0);
 
-            }
+                if (swipeNormal.y < -.8) {
+                    for (var i = 0; i < children.length; i++) {
 
-            if (swipeNormal.y < -.8) {
-                for (var i = 0; i < children.length; i++) {
-
-                    // 越下面层级越高
-                    children[i].depth = children[i].y;
+                        // 越下面层级越高
+                        children[i].depth = children[i].y;
+                    }
+                    console.log('向上')
+                    this.move(-1, 0);
                 }
-                console.log('向上')
-                this.move(-1, 0);
             }
         }
     }
 
 
     handleKey = (e) => {
-
-        console.log(this.canMove)
 
         if (this.canMove) {
             let children = this.tileGroup.getChildren();
