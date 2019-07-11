@@ -462,7 +462,7 @@ class MainScene extends Phaser.Scene {
                 targets: [this.tileArray[chosenTile.row][chosenTile.col].tileSprite],
                 alpha: 1,
                 duration: TWEEN_DURATION,
-                onCompolete: () => {
+                onComplete: () => {
                     this.canMove = true;
                 }
             });
