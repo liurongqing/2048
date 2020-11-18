@@ -11,7 +11,7 @@
 - 支持 移动端滑动操作
 
 ## 项目在线演示
-https://www.liurongqing.com/2048
+ https://liurongqing.github.io/2048/
 
 ![2048](./assets/images/2048.png)
 
