@@ -15,9 +15,6 @@
 
 ![2048](./assets/images/2048.png)
 
-## 开发教程
-https://www.liurongqing.com/tag/phaser
-
 ## 运行本项目
 ```bash
 # 克隆项目
